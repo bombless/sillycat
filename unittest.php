@@ -41,7 +41,7 @@ function AssertNotNull($expr, $ac){
     if($ac !== null){
         echo 'passed: <<<', $str, '>>> = ', $ac;
     }else{
-        echo '!!error: get null instead true when testing <<<', $str, '>>>';
+        echo '!!error: get NULL when testing <<<', $str, '>>>';
     }
     echo "\n";
 }
