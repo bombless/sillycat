@@ -10,24 +10,27 @@ function SimilarTokens($lhs, $rhs){
     }
     return true;
 }
+function DumpTokens($arr){
+    foreach($arr as $item){
+        echo '[', $item[0], ', ', $item[1], ']', "\n";
+    }
+}
 function AssertSimilar($expr, $val, $ex){
     if(!$val && $ex){
-        echo '!!error: <<<',
-        var_dump($expr);
-        echo '>>> get NULL', "\n";
+        echo '!!error: <<<', $expr, '>>> get NULL', "\n";
         exit;
     }
     if(SimilarTokens($val, $ex)){
         echo "passed:\n";
         echo '<<<', $expr, '>>> = <<<';
-        var_dump($ex);
+        DumpTokens($ex);
         echo '>>>', "\n";
     }else{
         echo "!!error:\n";
         echo 'expect <<<', $expr, '>>> = ', "\n<<<";
-        var_dump($ex);
+        DumpTokens($ex);
         echo '>>>, get ', "\n<<<";
-        var_dump($val);
+        DumpTokens($val);
         echo '>>> instead.', "\n";
         exit;
     }
@@ -45,7 +48,7 @@ function AssertNotNull($expr, $ac){
     }
     echo "\n";
 }
-        
+
 require('tokenizer.php');
 
 $tokenizer = new \Tokenizer\Tokenizer();
@@ -68,3 +71,12 @@ AssertSimilar($src1, $tokens1, [
     ['for', 'for'], ['operator', '('], ['semicolon', ';'], ['operator', '*'],
     ['identifier', 'p'], ['operator', '!='], ['character-constant', "'\\0'"],
      ['semicolon', ';'], ['operator', '++'], ['operator', ')'], ['semicolon', ';']]);
+$src2 = file_get_contents('src2.c');
+$tokens2 = $tokenizer->Parse($src2);
+AssertSimilar($src2, $tokens2, [
+    ['type-specifier', 'void'], ['identifier', 'foo'], ['operator', '('],
+    ['type-specifier', 'char'], ['identifier', 'a'], ['operator', ')'],
+    ['operator', '{'], ['storage-class-specifier', 'typedef'],
+    ['type-specifier', 'char'], ['identifier', 'ch_t'], ['semicolon', ';'],
+    ['identifier', 'ch_t'], ['identifier', 'c'], ['semicolon', ';'],
+    ['return', 'return'], ['semicolon', ';'], ['operator', '}']]);

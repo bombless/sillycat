@@ -126,72 +126,6 @@ namespace Tokenizer{
             $this->pool = $pool;
             $this->tokens = $tokens;
         }
-        public function GetPool(){ return $this->pool; }
-        public function GetTokens(){ return $this->tokens; }
-    }
-    class Tokenizer{
-        private $pool;
-        private $tokens;
-        public function __construct(){
-            $s0 = new RichedNFA(
-                ['identifier', self::Identifier()],
-                ['white-space', self::Whitespace()],
-                ['type-specifier', self::ConcatCharacters('void')],
-                ['type-specifier', self::ConcatCharacters('char')],
-                ['type-specifier', self::ConcatCharacters('short')],
-                ['type-specifier', self::ConcatCharacters('int')],
-                ['type-specifier', self::ConcatCharacters('long')],
-                ['type-specifier', self::ConcatCharacters('float')],
-                ['type-specifier', self::ConcatCharacters('double')],
-                ['type-specifier', self::ConcatCharacters('signed')],
-                ['type-specifier', self::ConcatCharacters('unsigned')],
-                ['type-specifier', self::ConcatCharacters('_Bool')],
-                ['type-specifier', self::ConcatCharacters('_Complex')],
-                ['type-specifier', self::ConcatCharacters('_Imaginary')],
-                ['enum-specifier', self::ConcatCharacters('enum')],
-                ['struct-or-union', self::ConcatCharacters('union')],
-                ['struct-or-union', self::ConcatCharacters('struct')],
-                ['string-literal', self::StringLiteral()],
-                ['character-constant', self::CharLiteral()],
-                ['storage-class-speciﬁer', self::ConcatCharacters('typedef')],
-                ['storage-class-speciﬁer', self::ConcatCharacters('extern')],
-                ['storage-class-speciﬁer', self::ConcatCharacters('static')],
-                ['storage-class-speciﬁer', self::ConcatCharacters('auto')],
-                ['storage-class-speciﬁer', self::ConcatCharacters('register')],
-                ['type-qualifier', self::ConcatCharacters('const')],
-                ['type-qualifier', self::ConcatCharacters('restrict')],
-                ['type-qualifier', self::ConcatCharacters('volatile')],
-                ['function-speciﬁer', self::ConcatCharacters('inline')],
-                ['assignment-operator', self::ConcatCharacters('=')],
-                ['assignment-operator', self::ConcatCharacters('*=')],
-                ['assignment-operator', self::ConcatCharacters('/=')],
-                ['assignment-operator', self::ConcatCharacters('%=')],
-                ['assignment-operator', self::ConcatCharacters('+=')],
-                ['assignment-operator', self::ConcatCharacters('-=')],
-                ['assignment-operator', self::ConcatCharacters('<<=')],
-                ['assignment-operator', self::ConcatCharacters('>>=')],
-                ['assignment-operator', self::ConcatCharacters('&=')],
-                ['assignment-operator', self::ConcatCharacters('^=')],
-                ['assignment-operator', self::ConcatCharacters('|=')],
-                ['operator', self::OneOf('&', '*', '+', '-', '~', '!')],
-                ['operator', self::OneOf('[', ']', '(', ')', '{', '}', '.', '->')],
-                ['operator', self::OneOf('++', '--', '/', '%', '<<', '>>')],
-                ['operator', self::OneOf('<', '>', '<=', '>=', '==', '!=')],
-                ['operator', self::OneOf('^', '|', '&&', '||', '?', ':', ';', '...')],
-                ['operator', self::OneOf(',', '#', '#', '<:', ':>', '<%', '%>', '%:', '%:%:')],
-                ['semicolon', NFA::CreateSingleTransition(';')],
-                ['goto', self::ConcatCharacters('goto')],
-                ['do', self::ConcatCharacters('do')],
-                ['while', self::ConcatCharacters('while')],
-                ['for', self::ConcatCharacters('for')],
-                ['continue', self::ConcatCharacters('continue')],
-                ['break', self::ConcatCharacters('break')],
-                ['return', self::ConcatCharacters('return')],
-                ['case', self::ConcatCharacters('case')],
-                ['switch', self::ConcatCharacters('switch')]);
-            $this->pool = $s0->GetPool();
-            $this->tokens = $s0->GetTokens();
-        }
         private function GetClosures($ref, $acc = []){
             $pool = $this->pool;
             $ret = array_diff($pool[$ref]->closure, $acc);
@@ -232,6 +166,92 @@ namespace Tokenizer{
             }
             if(count($target))return $target[max(array_keys($target))];
             return null;
+        }
+        public function Parse($src){
+            $ret = [];
+            $len = strlen($src);
+            $pos = 0;
+            $end = $len - $pos;
+            while($pos < $len && $pos < $end){
+                $test = $this->Test(substr($src, $pos, $end - $pos));
+                if($test){
+                    $ret[] = [$test, substr($src, $pos, $end - $pos)];
+                    $pos = $end;
+                    $end = $len;
+                }else{
+                    $end -= 1;
+                }
+            }
+            if($pos < $len)return null;
+            return $ret;
+        }
+    }
+    class Tokenizer{
+        private $s0;
+        public function Parse($str){
+            return $this->s0->Parse($str);
+        }
+        public function Test($str){
+            return $this->s0->Test($str);
+        }
+        public function __construct(){
+            $this->s0 = new RichedNFA(
+                ['identifier', self::Identifier()],
+                ['white-space', self::Whitespace()],
+                ['type-specifier', self::ConcatCharacters('void')],
+                ['type-specifier', self::ConcatCharacters('char')],
+                ['type-specifier', self::ConcatCharacters('short')],
+                ['type-specifier', self::ConcatCharacters('int')],
+                ['type-specifier', self::ConcatCharacters('long')],
+                ['type-specifier', self::ConcatCharacters('float')],
+                ['type-specifier', self::ConcatCharacters('double')],
+                ['type-specifier', self::ConcatCharacters('signed')],
+                ['type-specifier', self::ConcatCharacters('unsigned')],
+                ['type-specifier', self::ConcatCharacters('_Bool')],
+                ['type-specifier', self::ConcatCharacters('_Complex')],
+                ['type-specifier', self::ConcatCharacters('_Imaginary')],
+                ['enum-specifier', self::ConcatCharacters('enum')],
+                ['struct-or-union', self::ConcatCharacters('union')],
+                ['struct-or-union', self::ConcatCharacters('struct')],
+                ['string-literal', self::StringLiteral()],
+                ['character-constant', self::CharLiteral()],
+                ['storage-class-specifier', self::ConcatCharacters('typedef')],
+                ['storage-class-specifier', self::ConcatCharacters('extern')],
+                ['storage-class-specifier', self::ConcatCharacters('static')],
+                ['storage-class-specifier', self::ConcatCharacters('auto')],
+                ['storage-class-specifier', self::ConcatCharacters('register')],
+                ['type-qualifier', self::ConcatCharacters('const')],
+                ['type-qualifier', self::ConcatCharacters('restrict')],
+                ['type-qualifier', self::ConcatCharacters('volatile')],
+                ['function-speciﬁer', self::ConcatCharacters('inline')],
+                ['assignment-operator', self::ConcatCharacters('=')],
+                ['assignment-operator', self::ConcatCharacters('*=')],
+                ['assignment-operator', self::ConcatCharacters('/=')],
+                ['assignment-operator', self::ConcatCharacters('%=')],
+                ['assignment-operator', self::ConcatCharacters('+=')],
+                ['assignment-operator', self::ConcatCharacters('-=')],
+                ['assignment-operator', self::ConcatCharacters('<<=')],
+                ['assignment-operator', self::ConcatCharacters('>>=')],
+                ['assignment-operator', self::ConcatCharacters('&=')],
+                ['assignment-operator', self::ConcatCharacters('^=')],
+                ['assignment-operator', self::ConcatCharacters('|=')],
+                ['operator', self::OneOf('&', '*', '+', '-', '~', '!')],
+                ['operator', self::OneOf('[', ']', '(', ')', '{', '}', '.', '->')],
+                ['operator', self::OneOf('++', '--', '/', '%', '<<', '>>')],
+                ['operator', self::OneOf('<', '>', '<=', '>=', '==', '!=')],
+                ['operator', self::OneOf('^', '|', '&&', '||', '?', ':', ';', '...')],
+                ['operator', self::OneOf(',', '#', '#', '<:', ':>', '<%', '%>', '%:', '%:%:')],
+                ['semicolon', NFA::CreateSingleTransition(';')],
+                ['goto', self::ConcatCharacters('goto')],
+                ['do', self::ConcatCharacters('do')],
+                ['while', self::ConcatCharacters('while')],
+                ['for', self::ConcatCharacters('for')],
+                ['continue', self::ConcatCharacters('continue')],
+                ['break', self::ConcatCharacters('break')],
+                ['return', self::ConcatCharacters('return')],
+                ['case', self::ConcatCharacters('case')],
+                ['default', self::ConcatCharacters('default')],
+                ['switch', self::ConcatCharacters('switch')]);
         }
         private static function Whitespace(){
             return self::OneOf(' ', "\f", "\v", "\t", "\r", "\n")->Kleene();
@@ -294,24 +314,6 @@ namespace Tokenizer{
             $escape = $backSlash->Concat($quote);
             $content = $otherThan->Pipe($escape)->Kleene();
             return $quote->Concat($content)->Concat($quote);
-        }
-        public function Parse($src){
-            $ret = [];
-            $len = strlen($src);
-            $pos = 0;
-            $end = $len - $pos;
-            while($pos < $len && $pos < $end){
-                $test = $this->Test(substr($src, $pos, $end - $pos));
-                if($test){
-                    $ret[] = [$test, substr($src, $pos, $end - $pos)];
-                    $pos = $end;
-                    $end = $len;
-                }else{
-                    $end -= 1;
-                }
-            }
-            if($pos < $len)return null;
-            return $ret;
         }
     }
 }
