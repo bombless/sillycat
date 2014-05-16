@@ -188,31 +188,15 @@ namespace Tokenizer{
             return $ret;
         }
     }
-    function printMap($m){
-        foreach($m as $i){
-            echo '"', implode('', $i->from), '"';
-            echo sprintf('(0x%02X)', ord($i->chr)), '=>"', implode('', $i->to), '"', "\n";
-        }
-    }
-    function printMap2($pool){
-        foreach($pool as $i => $item){
-            foreach($item->map as $k => $v){
-                echo $i, sprintf('(0x%02X)', ord($k)), '=>', $v, "\n";
-            }
-        }
-    }
     class Engine{
         private $pool;
         public function __construct(){
             $args = func_get_args();
             $rc = new \ReflectionClass(__NAMESPACE__ . '\RichedNFA');
             $nfa = $rc->newInstanceArgs($args);
-            //var_dump($nfa);
             $this->pool = self::Constructor($nfa);
-            //printMap2($this->pool);
         }
         private static function MakeDFA($tokens, $product, $map){
-        //var_dump(__line__, $tokens, __line__, $product);
             $newPool = [];
             $mapToId = [];
             $tokenIds = array_keys($tokens);
@@ -235,7 +219,7 @@ namespace Tokenizer{
                 $from = $mapToId[implode('', $item->from)];
                 $to = $mapToId[implode('', $item->to)];
                 $newPool[$from]->map[$item->chr] = $to;
-            }//var_dump(__line__, $newPool);
+            }
             return $newPool;
         }
         private static function Equals($lhs, $rhs){
@@ -250,7 +234,7 @@ namespace Tokenizer{
             return false;
         }
         private static function Constructor($nfa){
-            $pool = $nfa->GetPool();//var_dump(__line__, $pool, $nfa->GetTokens());
+            $pool = $nfa->GetPool();
             $q0 = self::GetClosures($nfa, [0]);
             $product = [$q0];
             $workingSet = [$q0];
@@ -260,16 +244,7 @@ namespace Tokenizer{
                 $c = 0;
                 echo 'workingSet', count($workingSet), ', product', count($product), "\n";
                 do{
-                    $t = self::GetClosures($nfa, self::Delta($nfa, $q, chr($c)));/*
-                    if(count($workingSet) < 15){
-                        echo sprintf('(0x%02X)', $c);
-                        var_dump($t);
-                    }*/
-                    /*
-                    if(count($t)){
-                        echo '##t##';
-                        var_dump($t);
-                    }*/
+                    $t = self::GetClosures($nfa, self::Delta($nfa, $q, chr($c)));
                     if(count($t) == 0){
                         $c += 1;
                         continue;
@@ -286,7 +261,6 @@ namespace Tokenizer{
                     $c += 1;
                 }while(ord(chr($c)) != 0);
             }
-            //var_dump(__line__, $product);
             return self::MakeDFA($nfa->GetTokens(), $product, $map);
         }
         private static function Delta($nfa, $config, $chr){

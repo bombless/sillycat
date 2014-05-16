@@ -267,20 +267,20 @@ namespace Tokenizer{
                 ['default', self::ConcatCharacters('default')],
                 ['switch', self::ConcatCharacters('switch')]);
         }
-        private static function Whitespace(){
+        public static function Whitespace(){
             return self::OneOf(' ', "\f", "\v", "\t", "\r", "\n")->Kleene();
         }
-        private static function Identifier(){
+        public static function Identifier(){
             return self::Nondigit()->Concat(self::Nondigit()->Pipe(self::Digit())->Kleene());
         }
-        private static function ConcatCharacters($str){
+        public static function ConcatCharacters($str){
             $acc = NFA::CreateUnit();
             for($i = 0; $i < strlen($str); ++$i){
                 $acc = $acc->Concat(NFA::CreateSingleTransition($str[$i]));
             }
             return $acc;
         }
-        private static function OneOf(){
+        public static function OneOf(){
             $args = func_get_args();
             if(count($args) == 0)return NFA::CreateUnit();
             $acc = self::ConcatCharacters($args[0]);
@@ -289,7 +289,7 @@ namespace Tokenizer{
             }
             return $acc;
         }
-        private static function Nondigit(){
+        public static function Nondigit(){
             $acc = NFA::CreateSingleTransition('_');
             for($i = ord('A'); $i <= ord('Z'); ++$i){
                 $acc = $acc->Pipe(NFA::CreateSingleTransition(chr($i)));
@@ -299,21 +299,21 @@ namespace Tokenizer{
             }
             return $acc;
         }
-        private static function Digit(){
+        public static function Digit(){
             $acc = NFA::CreateSingleTransition('0');
             for($i = ord('1'); $i <= ord('9'); ++$i){
                 $acc = $acc->Pipe(NFA::CreateSingleTransition(chr($i)));
             }
             return $acc;
         }
-        private static function OtherThan($chr){
+        public static function OtherThan($chr){
             $acc = NFA::CreateSingleTransition(chr(ord($chr) + 1));
             for($i = ord($chr) + 2; chr($i) != $chr; ++$i){
                 $acc = $acc->Pipe(NFA::CreateSingleTransition(chr($i)));
             }
             return $acc;
         }
-        private static function StringLiteral(){
+        public static function StringLiteral(){
             $otherThan = self::OtherThan('"');
             $backSlash = NFA::CreateSingleTransition('\\');
             $quote = NFA::CreateSingleTransition('"');
@@ -321,7 +321,7 @@ namespace Tokenizer{
             $content = $otherThan->Pipe($escape)->Kleene();
             return $quote->Concat($content)->Concat($quote);
         }
-        private static function CharLiteral(){
+        public static function CharLiteral(){
             $otherThan = self::OtherThan("'");
             $backSlash = NFA::CreateSingleTransition('\\');
             $quote = NFA::CreateSingleTransition("'");
