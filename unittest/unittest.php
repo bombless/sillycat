@@ -11,8 +11,16 @@ function SimilarTokens($lhs, $rhs){
     return true;
 }
 function DumpTokens($arr){
+    if($arr === null)echo "NULL\n";
     foreach($arr as $item){
         echo '[', $item[0], ', ', $item[1], ']', "\n";
+    }
+}
+function DumpEveryToken(){
+    $args = func_get_args();
+    foreach($args as $i){
+        echo "\n";
+        DumpTokens($i);
     }
 }
 function AssertSimilar($expr, $val, $ex){
@@ -49,8 +57,20 @@ function AssertNotNull($expr, $ac){
     echo "\n";
 }
 
-require('tokenizer.php');
-
+$foo = \Tokenizer\Tokenizer::ConcatCharacters('foo');
+$bar = \Tokenizer\Tokenizer::ConcatCharacters('bar');
+$space = \Tokenizer\Tokenizer::ConcatCharacters(' ')->Kleene();
+$e = new \Tokenizer\Engine(['foo', $foo], ['bar', $bar], ['space', $space]);
+var_dump($e->Test(''), $e->Test('foo'), $e->Test('bar'));
+DumpEveryToken($e->Parse('bar   foo'), $e->Parse('foobar'));
+ini_set('memory_limit','512M');
+$e = new \Tokenizer\Engine(
+                ['identifier', \Tokenizer\Tokenizer::Identifier()],
+                ['white-space', \Tokenizer\Tokenizer::Whitespace()],
+                ['type-specifier', \Tokenizer\Tokenizer::ConcatCharacters('char')],
+                ['semicolon', \Tokenizer\NFA::CreateSingleTransition(';')]);
+DumpEveryToken($e->Parse('char a;'));
+exit;
 $tokenizer = new \Tokenizer\Tokenizer();
 $phrases0 = ['int', ' ', 'i', "\n", 'char', ' ', 'c', '=', "'a'", ';', "\n"];
 foreach($phrases0 as $item){
