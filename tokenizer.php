@@ -186,16 +186,30 @@ namespace Tokenizer{
             return $ret;
         }
     }
-    class Tokenizer{
-        private $s0;
-        public function Parse($str){
-            return $this->s0->Parse($str);
+    class Engine{
+        private $nfa;
+        public function __construct(){
+            $args = func_get_args();
+            $rc = new \ReflectionClass(__NAMESPACE__ . '\RichedNFA');
+            $this->nfa = $rc->newInstanceArgs($args);
         }
         public function Test($str){
-            return $this->s0->Test($str);
+            return $this->nfa->Test($str);
+        }
+        public function Parse($str){
+            return $this->nfa->Parse($str);
+        }
+    }
+    class Tokenizer{
+        private $engine;
+        public function Parse($str){
+            return $this->engine->Parse($str);
+        }
+        public function Test($str){
+            return $this->engine->Test($str);
         }
         public function __construct(){
-            $this->s0 = new RichedNFA(
+            $this->engine = new Engine(
                 ['identifier', self::Identifier()],
                 ['white-space', self::Whitespace()],
                 ['type-specifier', self::ConcatCharacters('void')],
