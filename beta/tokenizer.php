@@ -383,7 +383,7 @@ namespace Tokenizer{
                 ['operator', self::OneOf('[', ']', '(', ')', '{', '}', '.', '->')],
                 ['operator', self::OneOf('++', '--', '/', '%', '<<', '>>')],
                 ['operator', self::OneOf('<', '>', '<=', '>=', '==', '!=')],
-                ['operator', self::OneOf('^', '|', '&&', '||', '?', ':', ';', '...')],
+                ['operator', self::OneOf('^', '|', '&&', '||', '?', ':', '...')],
                 ['operator', self::OneOf(',', '#', '#', '<:', ':>', '<%', '%>', '%:', '%:%:')],
                 ['semicolon', NFA::CreateSingleTransition(';')],
                 ['goto', self::ConcatCharacters('goto')],
